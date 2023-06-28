@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html ng-app="appConsulta">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <link href="../Content/bootstrap.min.css" rel="stylesheet" />
+
+    <script src="../Scripts/jquery-3.0.0.min.js"></script>
+    <script src="../Scripts/bootstrap.min.js"></script>
+
+    <script src="../Scripts/angular.min.js"></script>
+
+    <script>
+
+        var app = angular.module('appConsulta', []);
+        app.controller('consultaController',
+            function ($scope, $http) {
+
+                //função para executar o serviço de consulta da API..
+                $scope.consultar = function () {
+
+                    $http.get("http://localhost:49296/api/dependente/consultar")
+                        .then(function (obj) {
+                            $scope.dependentes = obj.data;
+                        })
+                        .error(function (e) {
+                            $scope.mensagem = e.data.Mensagem; //mensagem de erro..
+                        });
+                };  
+            });
+
+    </script>
+
+</head>
+<body class="container" ng-controller="consultaController">
+
+    <h2>Consulta de Dependentes</h2>
+    <a href="/index.html">Página inicial</a>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-4">
+            <label>Filtrar dependentes</label>
+            <input type="text" class="form-control"
+                   placeholder="Digite aqui" ng-model="filtropesquisa" />
+        </div>
+    </div>
+
+    <br />
+
+    <div>
+        <strong>{{mensagem}}</strong>
+    </div>
+
+    <table class="table table-bordered" ng-init="consultar()">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nome do Dependente</th>
+                <th>Data de Nascimento</th>
+                <th>Dados do Funcionário</th>
+                <th>Operações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="d in dependentes | filter : filtropesquisa">
+                <td>{{d.IdDependente}}</td>
+                <td>{{d.Nome}}</td>
+                <td>{{d.DataNascimento | date : 'dd/MM/yyyy'}}</td>
+                <td>
+                    {{d.Funcionario.Nome}} <br/>
+                    Salário: {{d.Funcionario.Salario | currency : 'R$'}} <br/>
+                    Admissão: {{d.Funcionario.DataAdmissao | date : 'dd/MM/yyyy'}}
+                </td>
+                <td>
+
+                    <button class="btn btn-primary btn-sm"
+                            data-target="#janelaedicao"
+                            data-toggle="modal">
+                        Atualizar
+                    </button>
+
+                    <button class="btn btn-danger btn-sm"
+                            data-target="#janelaexclusao"
+                            data-toggle="modal">
+                        Excluir
+                    </button>
+
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5">
+                    Quantidade de dependentes:
+                    {{(dependentes | filter: filtropesquisa).length}}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+</body>
+</html>
